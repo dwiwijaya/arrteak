@@ -48,9 +48,11 @@ const t = useTranslations(lang);
 <style>
 .hero {
   min-height: 100vh;
+  min-height: 100svh;
+  min-height: 100dvh;
+  box-sizing: border-box;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  padding-top: var(--nav-h);
   overflow: hidden;
 }
 
@@ -125,6 +127,7 @@ const t = useTranslations(lang);
 
 /* ─── RIGHT ───────────────────────────────────────────── */
 .hero-right {
+  max-height: 100vh;
   position: relative;
   overflow: hidden;
 }
