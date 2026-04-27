@@ -18,9 +18,9 @@ const t = useTranslations(lang);
   </div>
 
   <div class="cat-grid">
-    {categories.map(({ id, img, span }) => (
+    {categories.map(({ id, img, spanX, spanY }) => (
       <a
-        class={`cat-item ${span ? 'cat-item--span' : ''} dropdown-filter-link`}
+        class={`cat-item ${spanX ? 'cat-item--span-x' : ''} ${spanY ? 'cat-item--span-y' : ''} dropdown-filter-link`}
         href={`/products?filter=${id}`}
         aria-label={t(`cat.${id}` as any)}
       >
@@ -28,12 +28,12 @@ const t = useTranslations(lang);
           src={img}
           alt={t(`cat.${id}` as any)}
           class="cat-img"
-          width={span ? 1200 : 720}
-          height={span ? 900 : 960}
-          sizes={span
+          width={spanX || spanY ? 1200 : 720}
+          height={spanY ? 1200 : 960}
+          sizes={spanX || spanY
             ? '(max-width: 1000px) 100vw, 50vw'
             : '(max-width: 1000px) 50vw, 25vw'}
-          widths={span ? [720, 960, 1200] : [360, 540, 720]}
+          widths={spanX || spanY ? [720, 960, 1200] : [360, 540, 720]}
           format="webp"
           quality={76}
           loading="lazy"
@@ -62,6 +62,7 @@ const t = useTranslations(lang);
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   grid-template-rows: auto auto;
+  grid-auto-flow: dense;
   gap: 2px;
 }
 
@@ -69,7 +70,6 @@ const t = useTranslations(lang);
   position: relative;
   overflow: hidden;
   cursor: pointer;
-  aspect-ratio: 3/4;
   background: var(--grain);
   border: none;
   padding: 0;
@@ -77,8 +77,11 @@ const t = useTranslations(lang);
   text-decoration: none;
   display: block;
 }
-.cat-item--span {
+.cat-item--span-x {
   grid-column: span 2;
+}
+
+.cat-item--span-y {
   grid-row: span 2;
   aspect-ratio: auto;
 }
@@ -112,7 +115,8 @@ const t = useTranslations(lang);
   color: white;
   margin-bottom: 0.2rem;
 }
-.cat-item--span .cat-name { font-size: 1.7rem; }
+.cat-item--span-y .cat-name,
+.cat-item--span-x.cat-item--span-y .cat-name { font-size: 1.7rem; }
 .cat-sub {
   font-size: 0.6rem;
   letter-spacing: 0.18em;
@@ -137,11 +141,12 @@ const t = useTranslations(lang);
 /* ─── RESPONSIVE ─────────────────────────────────────── */
 @media (max-width: 1000px) {
   .cat-grid { grid-template-columns: repeat(2, 1fr); }
-  .cat-item--span { grid-column: span 2; aspect-ratio: 16/7; }
+  .cat-item--span-x { grid-column: span 2; }
+  .cat-item--span-x.cat-item--span-y { aspect-ratio: 16/7; }
 }
 @media (max-width: 600px) {
   .cat-grid { grid-template-columns: 1fr 1fr; }
-  .cat-item--span { aspect-ratio: 16/9; }
+  .cat-item--span-x.cat-item--span-y { aspect-ratio: 16/9; }
   .cat-header { flex-direction: column; gap: 1rem; align-items: flex-start; }
 }
 </style>

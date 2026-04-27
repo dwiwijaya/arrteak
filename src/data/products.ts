@@ -155,11 +155,12 @@ export const products: Product[] = [
   },
 ];
 
-export const categories: { id: Category; img: string; span?: boolean }[] = [
+export const categories: { id: Category; img: string; spanX?: boolean; spanY?: boolean }[] = [
   {
     id: 'washbasin-designer',
     img: 'https://images.unsplash.com/photo-1552321554-5fefe8c9ef14?w=800&q=80',
-    span: true,
+    spanX: true,
+    spanY: true,
   },
   {
     id: 'washbasin-root',
@@ -188,5 +189,6 @@ export const categories: { id: Category; img: string; span?: boolean }[] = [
   {
     id: 'home-accessory',
     img: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=600&q=80',
+    spanX: true,
   },
 ];
