@@ -1,0 +1,369 @@
+---
+import Base from '../layouts/Base.astro';
+import Nav from '../components/Nav.astro';
+import Footer from '../components/Footer.astro';
+import Panels from '../components/Panels.astro';
+import { useTranslations, type Lang } from '../data/i18n';
+
+const lang: Lang = 'en';
+const t = useTranslations(lang);
+---
+
+<Base title="Contact Arrteak — Handcrafted Teak Bathroom Furniture">
+  <Panels lang={lang} />
+  <Nav lang={lang} craftHref="/#why" contactHref="/contact" homeHref="/" />
+
+  <main class="contact-page">
+    <section class="contact-hero">
+      <div class="contact-hero__inner">
+        <div class="section-tag" data-i18n="contact.page.tag">{t('contact.page.tag')}</div>
+        <h1 class="contact-hero__title" data-i18n="contact.page.title">{t('contact.page.title')}</h1>
+        <p class="contact-hero__sub" data-i18n="contact.page.sub">{t('contact.page.sub')}</p>
+
+        <div class="contact-hero__cards">
+          <div class="contact-hero__card">
+            <span class="contact-hero__label" data-i18n="contact.page.card.1.label">{t('contact.page.card.1.label')}</span>
+            <strong data-i18n="contact.page.card.1.value">{t('contact.page.card.1.value')}</strong>
+          </div>
+          <div class="contact-hero__card">
+            <span class="contact-hero__label" data-i18n="contact.page.card.2.label">{t('contact.page.card.2.label')}</span>
+            <strong data-i18n="contact.page.card.2.value">{t('contact.page.card.2.value')}</strong>
+          </div>
+          <div class="contact-hero__card">
+            <span class="contact-hero__label" data-i18n="contact.page.card.3.label">{t('contact.page.card.3.label')}</span>
+            <strong data-i18n="contact.page.card.3.value">{t('contact.page.card.3.value')}</strong>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="contact-layout">
+      <div class="contact-details">
+        <div class="contact-panel">
+          <div class="contact-panel__title" data-i18n="contact.page.visit.title">{t('contact.page.visit.title')}</div>
+          <p data-i18n="contact.page.visit.body">{t('contact.page.visit.body')}</p>
+        </div>
+
+        <div class="contact-panel">
+          <div class="contact-panel__title" data-i18n="contact.page.availability.title">{t('contact.page.availability.title')}</div>
+          <div class="contact-stack">
+            <span data-i18n="contact.page.availability.days">{t('contact.page.availability.days')}</span>
+            <strong data-i18n="contact.page.availability.hours">{t('contact.page.availability.hours')}</strong>
+          </div>
+        </div>
+
+        <div class="contact-panel">
+          <div class="contact-panel__title" data-i18n="contact.page.studio.title">{t('contact.page.studio.title')}</div>
+          <div class="contact-stack">
+            <strong data-i18n="contact.page.studio.name">{t('contact.page.studio.name')}</strong>
+            <span data-i18n="contact.page.studio.address.1">{t('contact.page.studio.address.1')}</span>
+            <span data-i18n="contact.page.studio.address.2">{t('contact.page.studio.address.2')}</span>
+            <a href="tel:+6281234567890">+62 812-3456-7890</a>
+            <a href="mailto:info@arrteak.com">info@arrteak.com</a>
+          </div>
+        </div>
+      </div>
+
+      <section class="contact-form-panel" aria-labelledby="contact-form-title">
+        <div class="contact-form-panel__eyebrow" data-i18n="contact.page.form.eyebrow">{t('contact.page.form.eyebrow')}</div>
+        <h2 id="contact-form-title" class="contact-form-panel__title" data-i18n="contact.page.form.title">{t('contact.page.form.title')}</h2>
+        <p class="contact-form-panel__sub" data-i18n="contact.page.form.sub">{t('contact.page.form.sub')}</p>
+
+        <form id="contact-form" class="contact-form">
+          <div class="contact-form__grid">
+            <label class="contact-field">
+              <span data-i18n="contact.page.form.name">{t('contact.page.form.name')}</span>
+              <input id="contact-name" name="name" type="text" required />
+            </label>
+            <label class="contact-field">
+              <span data-i18n="contact.page.form.email">{t('contact.page.form.email')}</span>
+              <input id="contact-email" name="email" type="email" required />
+            </label>
+          </div>
+
+          <div class="contact-form__grid">
+            <label class="contact-field">
+              <span data-i18n="contact.page.form.phone">{t('contact.page.form.phone')}</span>
+              <input id="contact-phone" name="phone" type="tel" />
+            </label>
+            <label class="contact-field">
+              <span data-i18n="contact.page.form.topic">{t('contact.page.form.topic')}</span>
+              <select id="contact-topic" name="topic">
+                <option value="General enquiry" data-i18n="contact.page.form.option.general">{t('contact.page.form.option.general')}</option>
+                <option value="Wholesale enquiry" data-i18n="contact.page.form.option.wholesale">{t('contact.page.form.option.wholesale')}</option>
+                <option value="Schedule a visit" data-i18n="contact.page.form.option.visit">{t('contact.page.form.option.visit')}</option>
+                <option value="Custom request" data-i18n="contact.page.form.option.custom">{t('contact.page.form.option.custom')}</option>
+              </select>
+            </label>
+          </div>
+
+          <label class="contact-field">
+            <span data-i18n="contact.page.form.message">{t('contact.page.form.message')}</span>
+            <textarea id="contact-message" name="message" rows="7" required></textarea>
+          </label>
+
+          <div class="contact-form__actions">
+            <button type="submit" class="btn-primary" data-i18n="contact.page.form.submit">{t('contact.page.form.submit')}</button>
+            <p class="contact-form__note" data-i18n="contact.page.form.note">{t('contact.page.form.note')}</p>
+          </div>
+        </form>
+      </section>
+    </section>
+  </main>
+
+  <Footer lang={lang} homeHref="/" />
+</Base>
+
+<style>
+.contact-page {
+  padding-top: var(--nav-h);
+}
+
+.contact-hero {
+  padding: 3.75rem 5rem 2.5rem;
+  background:
+    linear-gradient(180deg, rgba(232, 220, 200, 0.5) 0%, rgba(250, 248, 244, 0.96) 72%),
+    var(--warm-white);
+  border-bottom: 1px solid var(--border);
+}
+
+.contact-hero__inner {
+  max-width: 980px;
+}
+
+.contact-hero__title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(3rem, 6vw, 5rem);
+  font-weight: 300;
+  line-height: 0.98;
+  color: var(--wood-dark);
+  margin-bottom: 1rem;
+}
+
+.contact-hero__sub {
+  max-width: 700px;
+  font-size: 0.94rem;
+  line-height: 1.9;
+  color: var(--text-sub);
+  margin-bottom: 2rem;
+}
+
+.contact-hero__cards {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.contact-hero__card {
+  padding: 1rem 1.2rem;
+  border: 1px solid var(--border);
+  background: rgba(250, 248, 244, 0.82);
+}
+
+.contact-hero__label {
+  display: block;
+  font-size: 0.62rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-light);
+  margin-bottom: 0.45rem;
+}
+
+.contact-hero__card strong {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: var(--wood-dark);
+}
+
+.contact-layout {
+  display: grid;
+  grid-template-columns: minmax(280px, 0.9fr) minmax(0, 1.1fr);
+  gap: 2rem;
+  padding: 2.5rem 5rem 5rem;
+}
+
+.contact-details,
+.contact-form-panel {
+  border: 1px solid var(--border);
+  background: rgba(250, 248, 244, 0.84);
+}
+
+.contact-details {
+  padding: 1.4rem;
+  display: grid;
+  gap: 1rem;
+  align-content: start;
+}
+
+.contact-panel {
+  padding: 1.1rem 1.2rem;
+  background: var(--warm-white);
+  border: 1px solid rgba(92, 61, 30, 0.08);
+}
+
+.contact-panel__title {
+  font-size: 0.66rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--wood-accent);
+  margin-bottom: 0.8rem;
+}
+
+.contact-panel p,
+.contact-stack {
+  font-size: 0.84rem;
+  line-height: 1.8;
+  color: var(--text-sub);
+}
+
+.contact-stack {
+  display: grid;
+  gap: 0.15rem;
+}
+
+.contact-stack strong,
+.contact-stack a {
+  color: var(--wood-dark);
+  text-decoration: none;
+  font-weight: 400;
+}
+
+.contact-form-panel {
+  padding: 2rem;
+}
+
+.contact-form-panel__eyebrow {
+  font-size: 0.66rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--wood-accent);
+  margin-bottom: 0.9rem;
+}
+
+.contact-form-panel__title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 2rem;
+  font-weight: 400;
+  color: var(--wood-dark);
+  margin-bottom: 0.6rem;
+}
+
+.contact-form-panel__sub {
+  font-size: 0.86rem;
+  line-height: 1.8;
+  color: var(--text-sub);
+  margin-bottom: 1.6rem;
+}
+
+.contact-form {
+  display: grid;
+  gap: 1rem;
+}
+
+.contact-form__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.contact-field {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.contact-field span {
+  font-size: 0.66rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-light);
+}
+
+.contact-field input,
+.contact-field select,
+.contact-field textarea {
+  width: 100%;
+  border: 1px solid var(--border);
+  background: white;
+  color: var(--wood-dark);
+  font: inherit;
+  padding: 0.9rem 1rem;
+  outline: none;
+}
+
+.contact-field textarea {
+  resize: vertical;
+  min-height: 170px;
+}
+
+.contact-field input:focus,
+.contact-field select:focus,
+.contact-field textarea:focus {
+  border-color: var(--wood-accent);
+}
+
+.contact-form__actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-top: 0.3rem;
+}
+
+.contact-form__note {
+  font-size: 0.74rem;
+  color: var(--text-light);
+}
+
+@media (max-width: 1000px) {
+  .contact-hero {
+    padding: 3rem 3rem 2rem;
+  }
+
+  .contact-layout {
+    grid-template-columns: 1fr;
+    padding: 2rem 3rem 4rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .contact-hero {
+    padding: 2.5rem 1.5rem 1.5rem;
+  }
+
+  .contact-hero__cards,
+  .contact-form__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .contact-layout {
+    padding: 1.5rem 1.5rem 3rem;
+    gap: 1.2rem;
+  }
+
+  .contact-form-panel {
+    padding: 1.4rem;
+  }
+}
+</style>
+
+<script>
+  const form = document.getElementById('contact-form');
+
+  form?.addEventListener('submit', (event) => {
+    event.preventDefault();
+
+    const name = (document.getElementById('contact-name') as HTMLInputElement).value.trim();
+    const email = (document.getElementById('contact-email') as HTMLInputElement).value.trim();
+    const phone = (document.getElementById('contact-phone') as HTMLInputElement).value.trim();
+    const topic = (document.getElementById('contact-topic') as HTMLSelectElement).value.trim();
+    const message = (document.getElementById('contact-message') as HTMLTextAreaElement).value.trim();
+
+    const subject = encodeURIComponent(`Arrteak Contact - ${topic}`);
+    const body = encodeURIComponent(
+      `Name: ${name}\nEmail: ${email}\nPhone: ${phone || '-'}\nTopic: ${topic}\n\nMessage:\n${message}`
+    );
+
+    window.location.href = `mailto:info@arrteak.com?subject=${subject}&body=${body}`;
+  });
+</script>

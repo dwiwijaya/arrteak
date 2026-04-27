@@ -11,6 +11,7 @@ const infoTabs = Object.keys(infoContent) as (keyof typeof infoContent)[];
 
 <!-- ─── CART OVERLAY ──────────────────────────────────── -->
 <div class="cart-overlay" id="cart-overlay" aria-hidden="true"></div>
+<div class="cart-overlay" id="wishlist-overlay" aria-hidden="true"></div>
 
 <!-- ─── CART SIDEBAR ─────────────────────────────────── -->
 <aside class="cart-sidebar" id="cart-sidebar" role="dialog" aria-modal="true" aria-label="Enquiry list">
@@ -32,6 +33,20 @@ const infoTabs = Object.keys(infoContent) as (keyof typeof infoContent)[];
     </div>
     <button class="checkout-btn" id="checkout-open" data-i18n="cart.send">{t('cart.send')}</button>
     <p class="checkout-note" data-i18n="cart.note">{t('cart.note')}</p>
+  </div>
+</aside>
+
+<aside class="cart-sidebar wishlist-sidebar" id="wishlist-sidebar" role="dialog" aria-modal="true" aria-label="Wishlist">
+  <div class="cart-header">
+    <span class="cart-header-title" data-i18n="wishlist.title">{t('wishlist.title')}</span>
+    <button class="cart-close" id="wishlist-close" aria-label="Close wishlist">✕</button>
+  </div>
+  <div class="cart-items" id="wishlist-items">
+    <div class="cart-empty">
+      <div class="cart-empty-icon">♡</div>
+      <div class="cart-empty-text" data-i18n="wishlist.empty">{t('wishlist.empty')}</div>
+      <div class="cart-empty-sub" data-i18n="wishlist.empty.sub">{t('wishlist.empty.sub')}</div>
+    </div>
   </div>
 </aside>
 
@@ -58,15 +73,15 @@ const infoTabs = Object.keys(infoContent) as (keyof typeof infoContent)[];
         <div class="contact-icon">✉</div>
         <div>
           <div class="contact-label">Email</div>
-          <div class="contact-value">hello@kayuart.id</div>
+          <div class="contact-value">info@arrteak.com</div>
         </div>
         <span class="contact-arrow" aria-hidden="true">→</span>
       </a>
-      <a href="https://www.instagram.com/kayuart.id" target="_blank" rel="noopener" class="contact-option">
+      <a href="https://www.instagram.com/arrteak" target="_blank" rel="noopener" class="contact-option">
         <div class="contact-icon" style="font-size:0.9rem">📷</div>
         <div>
           <div class="contact-label">Instagram DM</div>
-          <div class="contact-value">@kayuart.id</div>
+          <div class="contact-value">@arrteak</div>
         </div>
         <span class="contact-arrow" aria-hidden="true">→</span>
       </a>
@@ -129,9 +144,21 @@ interface CartItem {
   isBulk: boolean;
 }
 
+interface WishlistItem {
+  id: number;
+  name_en: string;
+  name_id: string;
+  material_en: string;
+  material_id: string;
+  img: string;
+  price: number;
+}
+
 // ─── State ────────────────────────────────────────────
 let cart: CartItem[] = [];
+let wishlist: WishlistItem[] = [];
 let currentLang: Lang = 'en';
+const WISHLIST_KEY = 'kayuart:wishlist';
 
 function t(key: string): string {
   return (ui[currentLang] as Record<string,string>)[key]
@@ -141,6 +168,23 @@ function t(key: string): string {
 
 function formatPrice(n: number): string {
   return 'Rp ' + n.toLocaleString('id-ID');
+}
+
+function loadWishlist(): WishlistItem[] {
+  try {
+    const saved = window.localStorage.getItem(WISHLIST_KEY);
+    const parsed = saved ? JSON.parse(saved) : [];
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveWishlist(items: WishlistItem[]) {
+  wishlist = items;
+  window.localStorage.setItem(WISHLIST_KEY, JSON.stringify(items));
+  renderWishlist();
+  document.dispatchEvent(new CustomEvent('ka:wishlistUpdated', { detail: { items } }));
 }
 
 // ─── CART open / close ────────────────────────────────
@@ -165,6 +209,30 @@ document.addEventListener('ka:togglecart', (e) => {
   else {
     const isOpen = document.getElementById('cart-sidebar')!.classList.contains('open');
     isOpen ? closeCart() : openCart();
+  }
+});
+
+function openWishlist() {
+  document.getElementById('wishlist-sidebar')!.classList.add('open');
+  document.getElementById('wishlist-overlay')!.classList.add('open');
+  document.getElementById('wishlist-overlay')!.removeAttribute('aria-hidden');
+  document.body.style.overflow = 'hidden';
+}
+function closeWishlist() {
+  document.getElementById('wishlist-sidebar')!.classList.remove('open');
+  document.getElementById('wishlist-overlay')!.classList.remove('open');
+  document.getElementById('wishlist-overlay')!.setAttribute('aria-hidden', 'true');
+  document.body.style.overflow = '';
+}
+
+document.getElementById('wishlist-close')!.addEventListener('click', closeWishlist);
+document.getElementById('wishlist-overlay')!.addEventListener('click', closeWishlist);
+document.addEventListener('ka:togglewishlist', (e) => {
+  const detail = (e as CustomEvent).detail;
+  if (detail?.forceOpen) openWishlist();
+  else {
+    const isOpen = document.getElementById('wishlist-sidebar')!.classList.contains('open');
+    isOpen ? closeWishlist() : openWishlist();
   }
 });
 
@@ -292,15 +360,15 @@ function openCheckout() {
   }).join('\n');
 
   const waMsg = encodeURIComponent(
-    `Hello KayuArt! I'd like to enquire:\n\n${lines}\n\nEst. Total: ${formatPrice(calcTotal)}${fclItems.length ? ' + FCL (negotiable)' : ''}\n\nPlease confirm pricing, availability and shipping. Thank you.`
+    `Hello Arrteak! I'd like to enquire:\n\n${lines}\n\nEst. Total: ${formatPrice(calcTotal)}${fclItems.length ? ' + FCL (negotiable)' : ''}\n\nPlease confirm pricing, availability and shipping. Thank you.`
   );
   (document.getElementById('wa-link') as HTMLAnchorElement).href = `https://wa.me/6281234567890?text=${waMsg}`;
 
-  const emailSubj = encodeURIComponent('KayuArt Product Enquiry');
+  const emailSubj = encodeURIComponent('Arrteak Product Enquiry');
   const emailBody = encodeURIComponent(
-    `Hello KayuArt,\n\nI am interested in:\n\n${lines}\n\nEst. Total: ${formatPrice(calcTotal)}${fclItems.length ? ' + FCL (negotiable)' : ''}\n\nPlease confirm pricing, shipping terms, and availability.\n\nThank you.`
+    `Hello Arrteak,\n\nI am interested in:\n\n${lines}\n\nEst. Total: ${formatPrice(calcTotal)}${fclItems.length ? ' + FCL (negotiable)' : ''}\n\nPlease confirm pricing, shipping terms, and availability.\n\nThank you.`
   );
-  (document.getElementById('email-link') as HTMLAnchorElement).href = `mailto:hello@kayuart.id?subject=${emailSubj}&body=${emailBody}`;
+  (document.getElementById('email-link') as HTMLAnchorElement).href = `mailto:info@arrteak.com?subject=${emailSubj}&body=${emailBody}`;
 
   closeCart();
   document.getElementById('checkout-modal')!.classList.add('open');
@@ -348,6 +416,67 @@ function switchInfoTab(tab: string) {
   }
 }
 
+function renderWishlist() {
+  const itemsEl = document.getElementById('wishlist-items')!;
+  const countEl = document.getElementById('wishlist-count')!;
+  const triggerEl = document.getElementById('wishlist-trigger');
+  const total = wishlist.length;
+
+  countEl.textContent = String(total);
+  countEl.classList.toggle('visible', total > 0);
+  triggerEl?.classList.toggle('active', total > 0);
+
+  if (total === 0) {
+    itemsEl.innerHTML = `
+      <div class="cart-empty">
+        <div class="cart-empty-icon">♡</div>
+        <div class="cart-empty-text">${t('wishlist.empty')}</div>
+        <div class="cart-empty-sub">${t('wishlist.empty.sub')}</div>
+      </div>`;
+    return;
+  }
+
+  itemsEl.innerHTML = wishlist.map(item => {
+    const name = currentLang === 'id' ? item.name_id : item.name_en;
+    const mat = currentLang === 'id' ? item.material_id : item.material_en;
+    return `
+      <div class="cart-item">
+        <img class="cart-item-img" src="${item.img}" alt="" loading="lazy">
+        <div>
+          <div class="cart-item-name">${name}</div>
+          <div class="cart-item-material">${mat}</div>
+          <button class="cart-remove wishlist-move-to-cart" data-id="${item.id}">${t('wishlist.move')}</button>
+          <button class="cart-remove wishlist-remove" data-id="${item.id}">${t('wishlist.remove')}</button>
+        </div>
+        <div class="cart-item-price">${formatPrice(item.price)}</div>
+      </div>`;
+  }).join('');
+
+  itemsEl.querySelectorAll<HTMLButtonElement>('.wishlist-remove').forEach(btn => {
+    btn.addEventListener('click', () => {
+      saveWishlist(wishlist.filter(item => item.id !== Number(btn.dataset.id)));
+    });
+  });
+
+  itemsEl.querySelectorAll<HTMLButtonElement>('.wishlist-move-to-cart').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const item = wishlist.find(entry => entry.id === Number(btn.dataset.id));
+      if (!item) return;
+      document.dispatchEvent(new CustomEvent('ka:addtocart', {
+        detail: {
+          product: item,
+          qty: 1,
+          unit: 'pcs',
+          isBulk: false,
+        },
+      }));
+      saveWishlist(wishlist.filter(entry => entry.id !== item.id));
+      closeWishlist();
+      document.dispatchEvent(new CustomEvent('ka:togglecart', { detail: { forceOpen: true } }));
+    });
+  });
+}
+
 document.getElementById('info-close')!.addEventListener('click', closeInfo);
 document.getElementById('info-modal')!.addEventListener('click', (e) => {
   if (e.target === document.getElementById('info-modal')) closeInfo();
@@ -362,6 +491,11 @@ document.addEventListener('ka:cartUpdated', (e) => {
   renderCart();
 });
 
+document.addEventListener('ka:wishlistUpdated', (e) => {
+  wishlist = (e as CustomEvent).detail.items;
+  renderWishlist();
+});
+
 document.addEventListener('ka:openinfo', (e) => {
   openInfo((e as CustomEvent).detail.tab);
 });
@@ -370,6 +504,7 @@ document.addEventListener('ka:setlang', (e) => {
   currentLang = (e as CustomEvent).detail.lang as Lang;
   // Re-render cart with new lang
   renderCart();
+  renderWishlist();
   // Re-translate static UI keys in panels
   document.querySelectorAll<HTMLElement>('[data-i18n]').forEach(el => {
     el.textContent = t(el.dataset.i18n!);
@@ -380,6 +515,7 @@ document.addEventListener('ka:setlang', (e) => {
 document.addEventListener('keydown', (e) => {
   if (e.key !== 'Escape') return;
   closeCart();
+  closeWishlist();
   closeCheckout();
   closeInfo();
 });
@@ -397,4 +533,7 @@ document.querySelectorAll<HTMLElement>('.info-pane').forEach(pane => {
   nodes.forEach(n => bodyDiv.appendChild(n));
   pane.appendChild(bodyDiv);
 });
+
+wishlist = loadWishlist();
+renderWishlist();
 </script>

@@ -4,9 +4,19 @@ import type { Category } from '../data/products';
 
 export interface Props {
   lang: Lang;
+  productsHref?: string;
+  craftHref?: string;
+  contactHref?: string;
+  homeHref?: string;
 }
 
-const { lang } = Astro.props;
+const {
+  lang,
+  productsHref = '/products',
+  craftHref = '/#why',
+  contactHref = '/contact',
+  homeHref = '/',
+} = Astro.props;
 const t = useTranslations(lang);
 
 const collectionLinks: { id: Category; key: string }[] = [
@@ -27,7 +37,7 @@ const infoLinks = [
 
 <nav id="site-nav">
   <!-- Logo -->
-  <a href="#" class="nav-logo">KAYU<span>ART</span></a>
+  <a href={homeHref} class="nav-logo">ARR<span>TEAK</span></a>
 
   <!-- Desktop links -->
   <ul class="nav-links" role="menubar">
@@ -45,10 +55,8 @@ const infoLinks = [
       <div class="nav-dropdown" id="dropdown-collections" role="menu">
         {collectionLinks.map(({ id, key }) => (
           <a
-            href="#products"
+            href={`${productsHref}?filter=${id}`}
             role="menuitem"
-            data-filter={id}
-            class="dropdown-filter-link"
           >
             {t(key as any)}
           </a>
@@ -81,7 +89,10 @@ const infoLinks = [
     </li>
 
     <li role="none">
-      <a href="#why" class="nav-link-plain">{t('nav.craft')}</a>
+      <a href={craftHref} class="nav-link-plain">{t('nav.craft')}</a>
+    </li>
+    <li role="none">
+      <a href={contactHref} class="nav-link-plain">{t('nav.contact')}</a>
     </li>
   </ul>
 
@@ -102,9 +113,17 @@ const infoLinks = [
       >ID</button>
     </div>
 
+    <button class="nav-icon-trigger wishlist-trigger" id="wishlist-trigger" aria-label="Open wishlist">
+      <svg class="nav-icon-svg" width="18" height="16" viewBox="0 0 18 16" fill="none" aria-hidden="true">
+        <path d="M9 14.3 2 8.1A4.1 4.1 0 0 1 7.7 2.4L9 3.7l1.3-1.3A4.1 4.1 0 0 1 16 8.1L9 14.3Z" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <span class="cart-trigger-label">{t('nav.wishlist')}</span>
+      <span class="cart-count" id="wishlist-count" aria-live="polite">0</span>
+    </button>
+
     <!-- Cart button -->
-    <button class="cart-trigger" id="cart-trigger" aria-label="Open enquiry list">
-      <svg width="18" height="16" viewBox="0 0 18 16" fill="none" aria-hidden="true">
+    <button class="nav-icon-trigger cart-trigger" id="cart-trigger" aria-label="Open enquiry list">
+      <svg class="nav-icon-svg" width="18" height="16" viewBox="0 0 18 16" fill="none" aria-hidden="true">
         <path d="M1 1h2.5l2.1 9h8.4l1.5-6H5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
         <circle cx="8" cy="14.5" r="1" fill="currentColor"/>
         <circle cx="14" cy="14.5" r="1" fill="currentColor"/>
@@ -124,7 +143,7 @@ const infoLinks = [
 <div class="mobile-menu" id="mobile-menu" role="dialog" aria-modal="true" aria-label="Navigation menu">
   <button class="mobile-menu-close" id="mobile-menu-close" aria-label="Close menu">✕</button>
   {collectionLinks.map(({ id, key }) => (
-    <a href="#products" class="mobile-menu-link dropdown-filter-link" data-filter={id}>
+    <a href={`${productsHref}?filter=${id}`} class="mobile-menu-link">
       {t(key as any)}
     </a>
   ))}
@@ -135,7 +154,8 @@ const infoLinks = [
     </button>
   ))}
   <hr class="mobile-menu-divider" />
-  <a href="#why" class="mobile-menu-link">{t('nav.craft')}</a>
+  <a href={craftHref} class="mobile-menu-link">{t('nav.craft')}</a>
+  <a href={contactHref} class="mobile-menu-link">{t('nav.contact')}</a>
 </div>
 
 <style>
@@ -292,7 +312,7 @@ nav {
 .lang-btn:hover { color: var(--text-sub); }
 .lang-btn.active { color: var(--wood-accent); border-bottom-color: var(--wood-accent); }
 
-.cart-trigger {
+.nav-icon-trigger {
   position: relative;
   background: none;
   border: none;
@@ -306,7 +326,16 @@ nav {
   color: var(--wood-dark);
   transition: color 0.2s;
 }
-.cart-trigger:hover { color: var(--wood-accent); }
+.nav-icon-trigger:hover { color: var(--wood-accent); }
+.nav-icon-svg {
+  flex-shrink: 0;
+}
+.wishlist-trigger.active {
+  color: var(--wood-accent);
+}
+.wishlist-trigger.active .nav-icon-svg path {
+  fill: currentColor;
+}
 .cart-count {
   position: absolute;
   top: -6px; right: -10px;
@@ -438,22 +467,16 @@ nav {
     });
   });
 
-  // ─── Filter links ─────────────────────────────────────
-  document.querySelectorAll<HTMLAnchorElement>('.dropdown-filter-link').forEach(link => {
-    link.addEventListener('click', (e) => {
-      e.preventDefault();
-      const filter = link.dataset.filter!;
-      document.dispatchEvent(new CustomEvent('ka:filter', { detail: { filter } }));
-      document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' });
-    });
-  });
-
   // ─── Info tab links ───────────────────────────────────
   document.querySelectorAll<HTMLButtonElement>('.dropdown-info-link').forEach(btn => {
     btn.addEventListener('click', () => {
       const tab = btn.dataset.tab!;
       document.dispatchEvent(new CustomEvent('ka:openinfo', { detail: { tab } }));
     });
+  });
+
+  document.getElementById('wishlist-trigger')!.addEventListener('click', () => {
+    document.dispatchEvent(new CustomEvent('ka:togglewishlist'));
   });
 
   // ─── Cart trigger ─────────────────────────────────────

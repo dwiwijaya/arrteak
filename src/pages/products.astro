@@ -1,0 +1,133 @@
+---
+import Base from '../layouts/Base.astro';
+import Nav from '../components/Nav.astro';
+import Products from '../components/Products.astro';
+import Footer from '../components/Footer.astro';
+import Panels from '../components/Panels.astro';
+import { useTranslations, type Lang } from '../data/i18n';
+import type { Category } from '../data/products';
+
+const lang: Lang = 'en';
+const t = useTranslations(lang);
+const requestedFilter = Astro.url.searchParams.get('filter');
+const allowedFilters = new Set<Category | 'all'>([
+  'all',
+  'washbasin-designer',
+  'washbasin-root',
+  'washbasin-stone',
+  'countertop',
+  'cabinet',
+  'mirror',
+  'bath-accessory',
+  'home-accessory',
+]);
+const initialFilter = allowedFilters.has((requestedFilter ?? 'all') as Category | 'all')
+  ? (requestedFilter ?? 'all')
+  : 'all';
+---
+
+<Base title="Arrteak Products — Handcrafted Teak Bathroom Furniture">
+  <Panels lang={lang} />
+
+  <Nav lang={lang} craftHref="/#why" homeHref="/" />
+  <main class="products-page">
+    <section class="products-hero">
+      <div class="products-hero__inner">
+        <div class="section-tag products-hero__tag" data-i18n="products.page.tag">{t('products.page.tag')}</div>
+        <h1 class="products-hero__title" data-i18n="products.page.title">{t('products.page.title')}</h1>
+        <p class="products-hero__sub" data-i18n="products.page.sub">{t('products.page.sub')}</p>
+        
+        
+      </div>
+    </section>
+    <Products lang={lang} initialFilter={initialFilter} />
+  </main>
+  <Footer lang={lang} homeHref="/" />
+</Base>
+
+<style>
+.products-page {
+  padding-top: var(--nav-h);
+}
+
+.products-hero {
+  padding: 3.5rem 5rem 2rem;
+  background:
+    linear-gradient(180deg, rgba(232, 220, 200, 0.45) 0%, rgba(250, 248, 244, 0.94) 72%),
+    var(--warm-white);
+  border-bottom: 1px solid var(--border);
+}
+
+.products-hero__inner {
+  max-width: 960px;
+}
+
+.products-hero__tag {
+  margin-bottom: 1.4rem;
+}
+
+.products-hero__title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(3rem, 6vw, 5rem);
+  font-weight: 300;
+  line-height: 0.98;
+  color: var(--wood-dark);
+  margin-bottom: 1rem;
+}
+
+.products-hero__sub {
+  max-width: 640px;
+  font-size: 0.92rem;
+  line-height: 1.9;
+  color: var(--text-sub);
+  margin-bottom: 2rem;
+}
+
+.products-hero__facts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.products-hero__fact {
+  padding: 1rem 1.2rem;
+  border: 1px solid var(--border);
+  background: rgba(250, 248, 244, 0.8);
+}
+
+.products-hero__fact-label {
+  display: block;
+  font-size: 0.62rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-light);
+  margin-bottom: 0.45rem;
+}
+
+.products-hero__fact strong {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: var(--wood-dark);
+}
+
+.products-page :global(#products.section) {
+  padding-top: 2.5rem;
+}
+
+@media (max-width: 1000px) {
+  .products-hero {
+    padding: 3rem 3rem 1.75rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .products-hero {
+    padding: 2.5rem 1.5rem 1.5rem;
+  }
+
+  .products-hero__facts {
+    grid-template-columns: 1fr;
+  }
+}
+</style>

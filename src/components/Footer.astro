@@ -2,8 +2,16 @@
 import { useTranslations, type Lang } from '../data/i18n';
 import type { Category } from '../data/products';
 
-export interface Props { lang: Lang; }
-const { lang } = Astro.props;
+export interface Props {
+  lang: Lang;
+  productsHref?: string;
+  homeHref?: string;
+}
+const {
+  lang,
+  productsHref = '/products',
+  homeHref = '/',
+} = Astro.props;
 const t = useTranslations(lang);
 
 const collections: { id: Category; key: string }[] = [
@@ -25,11 +33,11 @@ const infoLinks = [
 ];
 ---
 
-<footer>
+<footer id="contact">
   <div class="footer-top">
     <!-- Brand -->
     <div class="footer-brand">
-      <a href="#" class="footer-logo">KAYU<span>ART</span></a>
+      <a href={homeHref} class="footer-logo">ARR<span>TEAK</span></a>
       <p class="footer-desc" data-i18n="footer.desc">{t('footer.desc')}</p>
       <div class="footer-social">
         <a href="#" class="social-link" aria-label="Instagram">ig</a>
@@ -45,9 +53,7 @@ const infoLinks = [
         {collections.map(({ id, key }) => (
           <li>
             <a
-              href="#products"
-              class="footer-filter-link"
-              data-filter={id}
+              href={`${productsHref}?filter=${id}`}
               data-i18n={key}
             >
               {t(key as any)}
@@ -72,13 +78,32 @@ const infoLinks = [
     </div>
 
     <!-- Contact -->
-    <div>
+    <div class="footer-contact">
       <div class="footer-col-title" data-i18n="footer.col.contact">{t('footer.col.contact')}</div>
-      <ul class="footer-links">
-        <li><a href="https://wa.me/6281234567890">WhatsApp</a></li>
-        <li><a href="mailto:hello@kayuart.id">hello@kayuart.id</a></li>
-        <li><a href="#">Instagram</a></li>
-      </ul>
+      <div class="footer-contact-card">
+        <div class="footer-contact-block">
+          <div class="footer-contact-label" data-i18n="contact.phone.label">{t('contact.phone.label')}</div>
+          <a class="footer-contact-value" href="tel:+6281234567890">+62 812-3456-7890</a>
+          <div class="footer-contact-meta">
+            <span data-i18n="contact.hours.days">{t('contact.hours.days')}</span>
+            <span data-i18n="contact.hours.time">{t('contact.hours.time')}</span>
+          </div>
+        </div>
+
+        <div class="footer-contact-block">
+          <div class="footer-contact-label" data-i18n="contact.studio.label">{t('contact.studio.label')}</div>
+          <div class="footer-contact-value footer-contact-value--text" data-i18n="contact.studio.name">{t('contact.studio.name')}</div>
+          <div class="footer-contact-meta">
+            <span data-i18n="contact.studio.address.1">{t('contact.studio.address.1')}</span>
+            <span data-i18n="contact.studio.address.2">{t('contact.studio.address.2')}</span>
+          </div>
+        </div>
+
+        <div class="footer-contact-actions">
+          <a class="footer-contact-email" href="mailto:info@arrteak.com">info@arrteak.com</a>
+          <a class="footer-contact-cta" href="/contact" data-i18n="contact.form">{t('contact.form')}</a>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -173,6 +198,72 @@ footer {
   font-size: 0.68rem;
   color: rgba(245,240,232,0.28);
 }
+.footer-contact-card {
+  border: 1px solid rgba(245,240,232,0.12);
+  padding: 1.2rem;
+  background: rgba(245,240,232,0.03);
+}
+.footer-contact-block + .footer-contact-block {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(245,240,232,0.08);
+}
+.footer-contact-label {
+  font-size: 0.62rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(245,240,232,0.34);
+  margin-bottom: 0.45rem;
+}
+.footer-contact-value {
+  display: inline-block;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.02rem;
+  color: var(--cream);
+  text-decoration: none;
+  margin-bottom: 0.35rem;
+}
+.footer-contact-value--text {
+  display: block;
+}
+.footer-contact-meta {
+  display: grid;
+  gap: 0.2rem;
+  font-size: 0.78rem;
+  line-height: 1.6;
+  color: rgba(245,240,232,0.52);
+}
+.footer-contact-actions {
+  margin-top: 1.2rem;
+  padding-top: 1.1rem;
+  border-top: 1px solid rgba(245,240,232,0.08);
+  display: grid;
+  gap: 0.8rem;
+}
+.footer-contact-email {
+  font-size: 0.82rem;
+  color: var(--cream);
+  text-decoration: none;
+}
+.footer-contact-cta {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 42px;
+  padding: 0.8rem 1rem;
+  border: 1px solid rgba(245,240,232,0.2);
+  color: var(--cream);
+  text-decoration: none;
+  font-size: 0.68rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  transition: background 0.2s, border-color 0.2s, color 0.2s;
+}
+.footer-contact-cta:hover {
+  background: var(--wood-accent);
+  border-color: var(--wood-accent);
+  color: white;
+}
 
 @media (max-width: 1000px) {
   footer { padding: 4rem 3rem 2rem; }
@@ -186,14 +277,6 @@ footer {
 </style>
 
 <script>
-  document.querySelectorAll<HTMLAnchorElement>('.footer-filter-link').forEach(link => {
-    link.addEventListener('click', (e) => {
-      e.preventDefault();
-      document.dispatchEvent(new CustomEvent('ka:filter', { detail: { filter: link.dataset.filter } }));
-      document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' });
-    });
-  });
-
   document.querySelectorAll<HTMLButtonElement>('.footer-info-link').forEach(btn => {
     btn.addEventListener('click', () => {
       document.dispatchEvent(new CustomEvent('ka:openinfo', { detail: { tab: btn.dataset.tab } }));

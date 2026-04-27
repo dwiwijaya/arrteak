@@ -1,9 +1,13 @@
 ---
+import { Image } from 'astro:assets';
 import { useTranslations, type Lang } from '../data/i18n';
 import { products, type Category } from '../data/products';
 
-export interface Props { lang: Lang; }
-const { lang } = Astro.props;
+export interface Props {
+  lang: Lang;
+  initialFilter?: string;
+}
+const { lang, initialFilter = 'all' } = Astro.props;
 const t = useTranslations(lang);
 
 const filterKeys: { id: string; key: string }[] = [
@@ -19,7 +23,7 @@ const filterKeys: { id: string; key: string }[] = [
 ];
 ---
 
-<section id="products" class="section">
+<section id="products" class="section" data-initial-filter={initialFilter}>
   <div class="prod-header">
     <div class="section-tag" data-i18n="section.products">{t('section.products')}</div>
     <h2 class="section-title" data-i18n="section.products.title">{t('section.products.title')}</h2>
@@ -59,7 +63,7 @@ const filterKeys: { id: string; key: string }[] = [
   <div class="products-grid" id="products-grid">
     {products.map((p) => (
       <article
-        class="product-card fade-up"
+        class="product-card"
         data-category={p.category}
         data-id={p.id}
         data-price={p.price}
@@ -70,11 +74,23 @@ const filterKeys: { id: string; key: string }[] = [
         data-img={p.img}
       >
         <div class="product-img-wrap">
-          <img
+          <button class="wishlist-btn" type="button" aria-label="Save to wishlist" aria-pressed="false">
+            <svg width="18" height="16" viewBox="0 0 18 16" fill="none" aria-hidden="true">
+              <path d="M9 14.3 2 8.1A4.1 4.1 0 0 1 7.7 2.4L9 3.7l1.3-1.3A4.1 4.1 0 0 1 16 8.1L9 14.3Z" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+          <Image
             src={p.img}
             alt={lang === 'id' ? p.name_id : p.name_en}
             class="product-img"
+            width={720}
+            height={960}
+            sizes="(max-width: 700px) 100vw, (max-width: 1100px) 50vw, 33vw"
+            widths={[360, 540, 720]}
+            format="webp"
+            quality={76}
             loading="lazy"
+            decoding="async"
           />
           {p.badge && <span class="product-badge">{p.badge}</span>}
 
@@ -208,6 +224,35 @@ const filterKeys: { id: string; key: string }[] = [
   display: block;
 }
 .product-card:hover .product-img { transform: scale(1.04); }
+.wishlist-btn {
+  position: absolute;
+  top: 0.8rem;
+  right: 0.8rem;
+  z-index: 2;
+  width: 2.4rem;
+  height: 2.4rem;
+  border: 1px solid rgba(245,240,232,0.65);
+  background: rgba(250,248,244,0.92);
+  color: var(--wood-dark);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s, background 0.2s, border-color 0.2s, transform 0.2s;
+  backdrop-filter: blur(8px);
+}
+.wishlist-btn:hover {
+  color: var(--wood-accent);
+  border-color: rgba(196,133,58,0.5);
+  transform: translateY(-1px);
+}
+.wishlist-btn.active {
+  background: var(--wood-accent);
+  border-color: var(--wood-accent);
+  color: white;
+}
+.wishlist-btn.active path {
+  fill: currentColor;
+}
 
 .product-badge {
   position: absolute;
@@ -345,6 +390,8 @@ import { ui } from '../data/i18n';
 let currentFilter = 'all';
 let currentOrderType: 'retail' | 'bulk' = 'retail';
 let currentLang: Lang = (document.documentElement.lang as Lang) || 'en';
+const productsSection = document.getElementById('products');
+const initialFilter = productsSection?.dataset.initialFilter || 'all';
 
 function t(key: string): string {
   return (ui[currentLang] as Record<string, string>)[key]
@@ -367,7 +414,6 @@ function applyFilter(filter: string) {
     btn.classList.toggle('active', active);
     btn.setAttribute('aria-pressed', String(active));
   });
-  observeFadeUp();
 }
 
 // ─── Order type ───────────────────────────────────────
@@ -398,19 +444,6 @@ function applyTranslations() {
   });
 }
 
-// ─── Fade-up observer ─────────────────────────────────
-function observeFadeUp() {
-  const obs = new IntersectionObserver(entries => {
-    entries.forEach(e => {
-      if (e.isIntersecting) {
-        (e.target as HTMLElement).classList.add('visible');
-        obs.unobserve(e.target);
-      }
-    });
-  }, { threshold: 0.08 });
-  document.querySelectorAll('.fade-up:not(.visible)').forEach(el => obs.observe(el));
-}
-
 // ─── Cart helpers ──────────────────────────────────────
 interface CartItem {
   _key: string;
@@ -427,6 +460,34 @@ interface CartItem {
 }
 
 let cart: CartItem[] = [];
+const WISHLIST_KEY = 'kayuart:wishlist';
+
+function getWishlist() {
+  try {
+    const saved = window.localStorage.getItem(WISHLIST_KEY);
+    const parsed = saved ? JSON.parse(saved) : [];
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+function setWishlist(items: unknown[]) {
+  window.localStorage.setItem(WISHLIST_KEY, JSON.stringify(items));
+  document.dispatchEvent(new CustomEvent('ka:wishlistUpdated', { detail: { items } }));
+}
+
+function syncWishlistButtons() {
+  const wishlistIds = new Set(getWishlist().map((item: any) => String(item.id)));
+  document.querySelectorAll<HTMLElement>('.product-card').forEach(card => {
+    const active = wishlistIds.has(card.dataset.id!);
+    const btn = card.querySelector<HTMLButtonElement>('.wishlist-btn');
+    if (!btn) return;
+    btn.classList.toggle('active', active);
+    btn.setAttribute('aria-pressed', String(active));
+    btn.setAttribute('aria-label', active ? t('wishlist.remove') : t('wishlist.add'));
+  });
+}
 
 function addToCart(card: HTMLElement, qty: number, unit: string, isBulk: boolean) {
   const id = Number(card.dataset.id);
@@ -453,6 +514,32 @@ function addToCart(card: HTMLElement, qty: number, unit: string, isBulk: boolean
 // ─── Wire product buttons ──────────────────────────────
 function wireProductButtons() {
   document.querySelectorAll<HTMLElement>('.product-card').forEach(card => {
+    const wishlistBtn = card.querySelector<HTMLButtonElement>('.wishlist-btn');
+    wishlistBtn?.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const current = getWishlist();
+      const id = Number(card.dataset.id);
+      const exists = current.some((item: any) => item.id === id);
+      if (exists) {
+        setWishlist(current.filter((item: any) => item.id !== id));
+      } else {
+        setWishlist([
+          ...current,
+          {
+            id,
+            name_en: card.dataset.nameEn,
+            name_id: card.dataset.nameId,
+            material_en: card.dataset.materialEn,
+            material_id: card.dataset.materialId,
+            img: card.dataset.img,
+            price: Number(card.dataset.price),
+          },
+        ]);
+      }
+      syncWishlistButtons();
+    });
+
     // Retail button
     const retailBtn = card.querySelector<HTMLButtonElement>('.add-retail-btn');
     retailBtn?.addEventListener('click', () => {
@@ -491,6 +578,41 @@ document.addEventListener('ka:filter', (e) => {
 document.addEventListener('ka:setlang', (e) => {
   currentLang = (e as CustomEvent).detail.lang as Lang;
   applyTranslations();
+  syncWishlistButtons();
+});
+
+document.addEventListener('ka:wishlistUpdated', () => {
+  syncWishlistButtons();
+});
+
+document.addEventListener('ka:addtocart', (e) => {
+  const { product, qty, unit, isBulk } = (e as CustomEvent).detail;
+  const card = document.querySelector<HTMLElement>(`.product-card[data-id="${product.id}"]`);
+  if (card) {
+    addToCart(card, qty, unit, isBulk);
+    return;
+  }
+
+  const key = `${product.id}|${unit}|${isBulk ? 'bulk' : 'retail'}`;
+  const existing = cart.find(item => item._key === key);
+  if (existing) {
+    existing.qty += qty;
+  } else {
+    cart.push({
+      _key: key,
+      id: product.id,
+      name_en: product.name_en,
+      name_id: product.name_id,
+      material_en: product.material_en,
+      material_id: product.material_id,
+      img: product.img,
+      price: Number(product.price),
+      qty,
+      unit,
+      isBulk,
+    });
+  }
+  document.dispatchEvent(new CustomEvent('ka:cartUpdated', { detail: { cart } }));
 });
 
 document.querySelectorAll<HTMLButtonElement>('.filter-btn').forEach(btn => {
@@ -501,9 +623,9 @@ document.getElementById('btn-retail')!.addEventListener('click', () => setOrderT
 document.getElementById('btn-bulk')!.addEventListener('click', () => setOrderType('bulk'));
 
 // ─── Init ─────────────────────────────────────────────
-applyFilter('all');
+applyFilter(initialFilter);
 wireProductButtons();
-observeFadeUp();
+syncWishlistButtons();
 
 // Export cart to window so other components can access
 (window as any).__kayuart = { getCart: () => cart, getLang: () => currentLang };

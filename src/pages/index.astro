@@ -4,7 +4,6 @@ import Nav from '../components/Nav.astro';
 import Hero from '../components/Hero.astro';
 import Marquee from '../components/Marquee.astro';
 import Collections from '../components/Collections.astro';
-import Products from '../components/Products.astro';
 import WhyProcess from '../components/WhyProcess.astro';
 import Footer from '../components/Footer.astro';
 import Panels from '../components/Panels.astro';
@@ -19,15 +18,14 @@ const lang: Lang = 'en';
   <Panels lang={lang} />
 
   <!-- Page -->
-  <Nav lang={lang} />
+  <Nav lang={lang} craftHref="#why" homeHref="/" />
   <main>
     <Hero lang={lang} />
     <Marquee lang={lang} />
     <Collections lang={lang} />
-    <Products lang={lang} />
     <WhyProcess lang={lang} />
   </main>
-  <Footer lang={lang} />
+  <Footer lang={lang} homeHref="/" />
 </Base>
 
 <script>
