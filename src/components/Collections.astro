@@ -6,6 +6,22 @@ import { categories } from '../data/products';
 export interface Props { lang: Lang; }
 const { lang } = Astro.props;
 const t = useTranslations(lang);
+
+const collectionImages = import.meta.glob('../assets/*.{jpg,jpeg,png,webp,avif}', {
+  eager: true,
+  import: 'default',
+});
+
+const collectionImageById = {
+  'washbasin-designer': collectionImages['../assets/designer-washbasins.jpg'],
+  'washbasin-root': collectionImages['../assets/root-wood-washbasins.jpg'],
+  'washbasin-stone': collectionImages['../assets/natural-stone-washbasin.jpg'],
+  countertop: collectionImages['../assets/washbin-countertops.jpg'],
+  cabinet: collectionImages['../assets/bathroom-cabinets.jpg'],
+  mirror: collectionImages['../assets/mirror.jpg'],
+  'bath-accessory': collectionImages['../assets/bathroom-accessories.jpg'],
+  'home-accessory': collectionImages['../assets/home-accessories.jpg'],
+} as const;
 ---
 
 <section id="categories" class="section section--cream">
@@ -18,14 +34,14 @@ const t = useTranslations(lang);
   </div>
 
   <div class="cat-grid">
-    {categories.map(({ id, img, spanX, spanY }) => (
+    {categories.map(({ id, spanX, spanY }) => (
       <a
         class={`cat-item ${spanX ? 'cat-item--span-x' : ''} ${spanY ? 'cat-item--span-y' : ''} dropdown-filter-link`}
         href={`/products?filter=${id}`}
         aria-label={t(`cat.${id}` as any)}
       >
         <Image
-          src={img}
+          src={collectionImageById[id]}
           alt={t(`cat.${id}` as any)}
           class="cat-img"
           width={spanX || spanY ? 1200 : 720}
